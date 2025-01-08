@@ -1,0 +1,19 @@
+
+services:
+  torchserve-chattts-gpu:
+    image: torchserve-chattts:latest-gpu
+    container_name: torchserve-chattts-gpu
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    runtime: nvidia
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=all
+    restart: unless-stopped
