@@ -33,7 +33,7 @@ jobs:
       id: model_path
       run: |
         # Find the latest snapshot directory (level 1 directory) by sorting the directories by modification time
-        MODEL_DIR=$(ls -d ~/.cache/huggingface/hub/models--2Noise--ChatTTS/snapshots | sort -r | head -n 1)
+        MODEL_DIR=$(ls -d ~/.cache/huggingface/hub/models--2Noise--ChatTTS/snapshots/* | sort -r | head -n 1)
         echo "MODEL_DIR=$MODEL_DIR" >> $GITHUB_ENV
 
     - name: Archive the model with torch-model-archiver
