@@ -110,13 +110,8 @@ class ChatTTSHandler(BaseHandler):
         """Run inference."""
 
         for key, params in data.items():
-            logger.info(f"Request: {key}")
-            logger.info(f"Text input: {str(params['text'])}")
-
-            text = params["text"]
-            if params["params_refine_text"]:
-                text = self.chat.infer(text=text, refine_text_only=True, params_refine_text=params["params_refine_text"])
-                logger.info(f"Refined text: {text}")
+            logger.debug(f"Request: {key}")
+            logger.debug(f"Text input: {str(params['text'])}")
 
             yield self.chat.infer(**params)
 
