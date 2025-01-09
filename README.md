@@ -83,27 +83,16 @@ curl --location --request GET 'http://127.0.0.1:8080/predictions/chattts' \
 --data '{
     "text": "今天天气不错哦",
     "stream": false,
-    "temperature": 0.3,
     "lang": "zh",
-    "skip_refine_text": true,
-    "refine_text_only": false,
     "use_decoder": true,
     "do_text_normalization": true,
     "do_homophone_replacement": false,
+    "params_refine_text": {
+        "prompt": "[oral_0][break_6]"
+    },
     "params_infer_code": {
-        "prompt": "",
-        "top_P": 0.7,
-        "top_K": 20,
-        "temperature": 0.3,
-        "repetition_penalty": 1.05,
-        "max_new_token": 2048,
-        "min_new_token": 0,
-        "show_tqdm": true,
-        "ensure_non_empty": true,
-        "manual_seed": 888,
-        "stream_batch": 24,
-        "stream_speed": 12000,
-        "pass_first_n_batches": 2
+        "prompt": "[speed_4]",
+        "manual_seed": 888
     }
 }' --output test.wav
 ```

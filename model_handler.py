@@ -91,14 +91,14 @@ class ChatTTSHandler(BaseHandler):
                         "do_homophone_replacement", False
                     ),
                     "params_refine_text": (
-                        ChatTTS.Chat.InferCodeParams(**params_refine_text)
+                        ChatTTS.Chat.RefineTextParams(**params_refine_text)
                         if params_refine_text
-                        else None
+                        else ChatTTS.Chat.RefineTextParams()
                     ),
                     "params_infer_code": (
                         ChatTTS.Chat.InferCodeParams(**params_infer_code)
                         if params_infer_code
-                        else None
+                        else ChatTTS.Chat.InferCodeParams()
                     ),
                 }
             else:
@@ -115,7 +115,7 @@ class ChatTTSHandler(BaseHandler):
 
             text = params["text"]
             if params["params_refine_text"]:
-                text = self.chat.infer(text=text, refine_text_only=True)
+                text = self.chat.infer(text=text, refine_text_only=True, params_refine_text=params["params_refine_text"])
                 logger.info(f"Refined text: {text}")
 
             yield self.chat.infer(**params)
