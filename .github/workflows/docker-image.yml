@@ -51,5 +51,6 @@ jobs:
         context: .
         push: true
         tags: chattts-torchserve:latest
-        github-token: ${{ github.token }}
+        github-token: ${{ secrets.DOCKER_PAT }}
+
 
