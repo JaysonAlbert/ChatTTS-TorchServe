@@ -46,4 +46,10 @@ jobs:
                              --export-path model_store
     
     - name: Build the Docker image
-      run: docker build .  --tag chattts-torchservee:$(date +%s)
+      uses: docker/build-push-action@v6.11.0
+      with:
+        context: .
+        push: true
+        tags: chattts-torchserve:latest
+        github-token: ${{ github.token }}
+
