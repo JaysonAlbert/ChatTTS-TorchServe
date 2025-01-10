@@ -44,13 +44,17 @@ jobs:
                              --handler model_handler.py \
                              --extra-files ${{ env.MODEL_DIR }} \
                              --export-path model_store
-    
+    - name: Log in to Docker Hub using GITHUB_TOKEN
+      uses: docker/login-action@v2
+      with:
+        username: ${{ github.actor }}  # GitHub username
+        password: ${{ secrets.GITHUB_TOKEN }}  # GitHub token for authentication
+
     - name: Build the Docker image
       uses: docker/build-push-action@v6.11.0
       with:
         context: .
         push: true
         tags: chattts-torchserve:latest
-        github-token: ${{ secrets.DOCKER_PAT }}
 
 
