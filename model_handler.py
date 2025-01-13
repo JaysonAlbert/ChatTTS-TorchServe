@@ -123,6 +123,7 @@ class ChatTTSHandler(BaseHandler):
         for wavs in batched_results:
             if isinstance(wavs, types.GeneratorType):  # stream mode
                 for chunk in wavs:
+                    bufs = []
                     for wav in chunk:
                         buf = io.BytesIO()
                         torchaudio.save(
@@ -130,16 +131,20 @@ class ChatTTSHandler(BaseHandler):
                             torch.from_numpy(wav).unsqueeze(0),
                             24000,
                             format="wav",
+                            bits_per_sample=16,
                         )
                         buf.seek(0)
-                        logger.info(f"Sending intermediate result, request_ids: {self.context.request_ids}")
-                        send_intermediate_predict_response(
-                            buf.getvalue(),
-                            self.context.request_ids,
-                            "audio/wav",
-                            200,
-                            self.context,
-                        )
+                        bufs.append(buf.getvalue())
+                    logger.info(
+                        f"Sending intermediate result, request_ids: {self.context.request_ids}"
+                    )
+                    send_intermediate_predict_response(
+                        bufs,
+                        self.context.request_ids,
+                        "audio/wav",
+                        200,
+                        self.context,
+                    )
                 # return empty result to avoid returning the same result multiple times
                 for i in range(len(self.context.request_ids)):
                     results.append(b"")
