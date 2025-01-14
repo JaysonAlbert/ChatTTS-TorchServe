@@ -58,5 +58,8 @@ jobs:
         context: .
         push: true
         tags: carnie/chattts-torchserve:latest
-
-
+        # Description of the image
+        labels: |
+          org.opencontainers.image.description=TorchServe container for ChatTTS model inference
+          org.opencontainers.image.category=ai
+          org.opencontainers.image.overview=A containerized TorchServe deployment for ChatTTS text-to-speech model, built with PyTorch and CUDA support
