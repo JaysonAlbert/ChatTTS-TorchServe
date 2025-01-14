@@ -10,8 +10,6 @@ RUN apt-get update && \
     make --no-install-recommends && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-RUN pip config set global.index-url https://mirrors.cloud.tencent.com/pypi/simple
-
 RUN pip install --upgrade pip \
     && pip install "numpy<2.0.0" torchserve torch-model-archiver  ChatTTS nvgpu soundfile nemo_text_processing WeTextProcessing --no-cache-dir
 
