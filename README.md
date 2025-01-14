@@ -61,21 +61,16 @@ torchserve --start --model-store model_store --models chattts=chattts.mar  --ts-
 
 * docker - Refer to the [official docker installation guide](https://docs.docker.com/install/)
 
-### 1. Build the docker image
-
 ```bash
-docker build -t torchserve-chattts:latest-gpu .
-```
-
-### 2. Start the container
-
-```bash
-docker run --name torchserve-chattts-gpu --gpus all -p 8080:8080 -p 8081:8081 torchserve-chattts:latest-gpu
+docker run --name torchserve-chattts-gpu --gpus all -p 8080:8080 -p 8081:8081 carnie/chattts-torchserve
 ```
 
 ## Inference with restful api
 
 Note that the `text` parameter takes a string instead of a list, TorchServe will automaticly batch multiple inferences into one request
+
+
+### 1. sync inference
 
 ``` bash
 curl --location --request GET 'http://127.0.0.1:8080/predictions/chattts' \
@@ -97,3 +92,8 @@ curl --location --request GET 'http://127.0.0.1:8080/predictions/chattts' \
 }' --output test.wav
 ```
 
+### 2. stream inference
+
+``` bash
+python tests/test_stream.py
+```

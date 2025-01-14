@@ -1,7 +1,7 @@
 
 services:
   torchserve-chattts-gpu:
-    image: torchserve-chattts:latest-gpu
+    image: carnie/chattts-torchserve
     container_name: torchserve-chattts-gpu
     ports:
       - "8080:8080"

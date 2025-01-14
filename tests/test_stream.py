@@ -1,16 +1,11 @@
-import ChatTTS
-import logging
-import io
-import torchaudio
-import torch
+import requests
+import pyaudio
+from pydub import AudioSegment
+from io import BytesIO
 
-chat = ChatTTS.Chat(logging.getLogger("ChatTTS"))
-chat.load(source="huggingface")
-
-pa = {}
-
-params = {
-    "text": ["你好", "代销上午流程deadline了，今天托管行交收金额11,234.23元，完成比例99%"],
+# Prepare the data as a dictionary
+data = {
+    "text": "代销上午流程deadline了，今天托管行交收金额11,234.23元，完成比例99%",
     "stream": True,
     "lang": "zh",
     "use_decoder": False,
@@ -27,30 +22,34 @@ params = {
     },
 }
 
-def process():
+# Prepare headers for the request
+headers = {"Content-Type": "application/json"}
 
-    for i in range(1):
-        pp = {
-            "text": params.get("text"),
-            "stream": params.get("stream", False),
-            "lang": params.get("lang"),
-            "skip_refine_text": params.get("skip_refine_text", False),
-            "use_decoder": params.get("use_decoder", True),
-            "do_text_normalization": params.get("do_text_normalization", True),
-            "do_homophone_replacement": params.get("do_homophone_replacement", False),
-            "params_refine_text": ChatTTS.Chat.RefineTextParams(),
-            "params_infer_code": ChatTTS.Chat.InferCodeParams(),
-        }
+# URL to which the request will be made
+url = "http://localhost:8080/predictions/chattts"
 
-        yield chat.infer(**pp)
+# Send POST request with JSON data
+response = requests.post(url, json=data, headers=headers, stream=True)
 
-for wavs in process():
-    print(type(wavs))
-    for chunk in wavs:
-        for wav in chunk:
-            print(wav.shape)
-            buf = io.BytesIO()
-            torchaudio.save(
-                                buf, torch.from_numpy(wav).unsqueeze(0), 24000, format="wav"
-                            )
-            buf.seek(0)
+# 打开音频流（配置为单声道、16位、24000采样率）
+
+# 初始化pyaudio来播放音频
+p = pyaudio.PyAudio()
+stream = p.open(
+    format=pyaudio.paInt16,
+    channels=1,
+    rate=24000,
+    output=True,
+)
+
+# 逐步读取并播放返回的音频流
+chunk_size = 24000 * 2  # 1 second of audio data (24000 samples per second * 2 bytes per sample)
+for chunk in response.iter_content(chunk_size=chunk_size):
+    if chunk:
+        audio = AudioSegment.from_wav(BytesIO(chunk))
+        # 将音频块写入PyAudio流进行播放
+        stream.write(audio.raw_data)
+
+stream.stop_stream()
+stream.close()
+p.terminate()
