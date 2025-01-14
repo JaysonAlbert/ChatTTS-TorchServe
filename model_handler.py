@@ -1,5 +1,6 @@
 import os
 import json
+import types
 import torch
 from typing import Callable
 from functools import partial
@@ -7,6 +8,7 @@ import io
 from ts.torch_handler.base_handler import BaseHandler
 import logging
 import torchaudio
+from ts.handler_utils.utils import send_intermediate_predict_response
 
 import ChatTTS
 
@@ -119,14 +121,40 @@ class ChatTTSHandler(BaseHandler):
         """Post-process inference results into raw wav data."""
         results = []
         for wavs in batched_results:
-            for wav in wavs:
-                buf = io.BytesIO()
-                try:
+            if isinstance(wavs, types.GeneratorType):  # stream mode
+                for chunk in wavs:
+                    bufs = []
+                    for wav in chunk:
+                        buf = io.BytesIO()
+                        torchaudio.save(
+                            buf,
+                            torch.from_numpy(wav).unsqueeze(0),
+                            24000,
+                            format="wav",
+                            bits_per_sample=16,
+                        )
+                        buf.seek(0)
+                        bufs.append(buf.getvalue())
+                    logger.info(
+                        f"Sending intermediate result, request_ids: {self.context.request_ids}"
+                    )
+                    send_intermediate_predict_response(
+                        bufs,
+                        self.context.request_ids,
+                        "audio/wav",
+                        200,
+                        self.context,
+                    )
+                # return empty result to avoid returning the same result multiple times
+                for i in range(len(self.context.request_ids)):
+                    results.append(b"")
+            else:
+                for wav in wavs:
+                    buf = io.BytesIO()
                     torchaudio.save(
                         buf, torch.from_numpy(wav).unsqueeze(0), 24000, format="wav"
                     )
-                except:
-                    torchaudio.save(buf, torch.from_numpy(wav), 24000, format="wav")
-                buf.seek(0)
-                results.append(buf.getvalue())
+                    buf.seek(0)
+                    results.append(buf.getvalue())
+
         return results
